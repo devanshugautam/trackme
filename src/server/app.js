@@ -1,4 +1,6 @@
 const express = require('express');
+const http = require("http");
+const { Server } = require("socket.io")
 const compression = require('compression');
 const path = require('path');
 const app = express();
@@ -6,8 +8,11 @@ const cors = require('cors');
 const { logger } = require('../utils/logger');
 require('dotenv').config();
 
+
+const server = http.createServer(app)
+const io = new Server(server)
 // local imports
-const {connectDB } = require('../dataSource/dbConnections');
+const { connectDB } = require('../dataSource/dbConnections');
 const { globalErrors, routeNotFound } = require('../helpers/errorHandlers');
 
 const LOG_ID = 'server/app';
@@ -29,4 +34,4 @@ require('../routes')(app);
 app.use(routeNotFound);
 app.use(globalErrors);
 
-exports.app = app;
+exports.app = server;
