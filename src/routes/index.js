@@ -8,4 +8,5 @@ const { apiV1Prefix } = require('../../config/default.json');
 module.exports = (app) => {
     app.use(apiV1Prefix, require('./heartBeat'));
     app.use(`${apiV1Prefix}/user`, require('./user'));
+    app.use(`${apiV1Prefix}/upload`, require('./fileUpload'));
 };

@@ -63,9 +63,9 @@ router.get('/getall', jwtVerify, validate(getAllUser), async (req, res) => {
 /**
  * Route for edit user profile.
  */
-router.post('/edit/:id', jwtVerify, validate(editUser), async (req, res) => {
+router.post('/edit', jwtVerify, validate(editUser), async (req, res) => {
     try {
-        const result = await userService.editUser(req.params.id, req.body);
+        const result = await userService.editUser(req.auth._id, req.body);
         if (result.success) {
             return handleResponse(res, statusCode.OK, result);
         }
