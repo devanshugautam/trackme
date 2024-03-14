@@ -31,3 +31,16 @@ exports.getAllUser = {
         sortOrder: Joi.string().optional()
     })
 };
+
+exports.editUser = {
+    body: Joi.object({
+        fname: Joi.string().optional(),
+        lname: Joi.string().optional(),
+        email: Joi.string().optional(),
+        address: Joi.string().optional(),
+        sosNumber: Joi.array().items(Joi.string().required()).optional(),
+        mobile: Joi.string().optional(),
+        mobileCode: Joi.string().optional(),
+        image: Joi.string().optional()
+    })
+};
