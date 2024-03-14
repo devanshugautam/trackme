@@ -176,3 +176,41 @@ exports.getAllUsers = async (queryParam) => {
         };
     }
 };
+
+/**
+ * Edit user profile
+ * 
+ * @param {string} userId - req params
+ * @param {object} updatedData - req body
+ * @returns {object} - An object
+ */
+exports.editUser = async (userId, updatedData) => {
+    try {
+        if (updatedData.email) {
+            const checkUniqueEmail = await query.findOne(userModel, { _id: { $ne: userId }, email: updatedData.email });
+            if (checkUniqueEmail) return {
+                success: false,
+                message: 'This email is already taken. Please choose a different one.'
+            };
+        }
+        // Update the user's information
+        const updateUser = await userModel.findOneAndUpdate({ _id: userId }, updatedData, { new: true });
+        if (updateUser) {
+            delete updateUser._doc.password;
+            delete updateUser._doc.token;
+            if (!updateUser._doc.image) updateUser._doc.image = process.env.DUMMY_IMAGE;
+            return {
+                success: true,
+                message: 'user profile updated successfully.',
+                data: updateUser
+            };
+        }
+
+    } catch (error) {
+        logger.error(LOG_ID, `Error occurred while editing user profile: ${error}`);
+        return {
+            success: false,
+            message: 'Something went wrong.'
+        };
+    }
+};
