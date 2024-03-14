@@ -47,7 +47,7 @@ exports.login = async (reqBody) => {
             email: userData.email,
             username: userData.username
         });
-
+        if (!userData.image) userData.image = process.env.DUMMY_IMAGE;
         await userModel.updateOne({ _id: findUser._id }, { token });
         return {
             success: true,

@@ -19,6 +19,8 @@ const LOG_ID = 'server/index';
  */
 const start = async () => {
     try {
+        console.log('>>>>>>>>>>>>>', process.argv.slice(2));
+        console.log('>>>>>>>>>>>>>', process.execArgv);
         logger.info(LOG_ID, `~~~ ${pkgInfo.name} v${pkgInfo.version} ~~~`);
         let isConnected = false;
         app.listen(port, (err) => {
