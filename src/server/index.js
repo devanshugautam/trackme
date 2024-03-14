@@ -23,7 +23,7 @@ const start = async () => {
         console.log('>>>>>>>>>>>>>', process.execArgv);
         logger.info(LOG_ID, `~~~ ${pkgInfo.name} v${pkgInfo.version} ~~~`);
         let isConnected = false;
-        app.listen(port, (err) => {
+        server.listen(port, (err) => {
             if (err) logger.error(LOG_ID, err);
             isConnected = true;
             logger.info(LOG_ID, `🌷 ${pkgInfo.name} src/index.js, version ${pkgInfo.version}, listening on port ${port}!`);
