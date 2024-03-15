@@ -24,7 +24,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(process.cwd(), '/public')));
 
 const server = http.createServer(app);
-global.io = socketIo(server, {
+const io = socketIo(server, {
     cors: {
         origin: '*',
         methods: ['GET', 'POST']
@@ -32,6 +32,7 @@ global.io = socketIo(server, {
 });
 
 connectDB();
+require('../services/socket')(io);
 // const { userModel } = require('../dbModel');
 // io.on('connection', (socket) => {
 //     console.log('A user connected');
