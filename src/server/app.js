@@ -31,9 +31,9 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         console.log('User disconnected');
     });
-    socket.on('getuserLocation', ({ userId, lat, long }) => {
-        console.log('Message received: ', { userId, lat, long });
-        socket.emit('sendcheck', { success: true, message: 'user location fetched successfully.', userId: userId || 'ajshlasd' });
+    socket.on('getuserLocation', (data) => {
+        console.log('Message received: ', data);
+        socket.emit('sendcheck', { success: true, message: 'user location fetched successfully.', userId: data.userId || 'ajshlasd' });
     });
 });
 
