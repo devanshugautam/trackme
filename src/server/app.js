@@ -1,6 +1,6 @@
 const express = require('express');
 const http = require('http');
-// const { Server } = require('socket.io');
+const socketIo = require('socket.io');
 const compression = require('compression');
 const path = require('path');
 const app = express();
@@ -10,7 +10,7 @@ require('dotenv').config();
 
 
 const server = http.createServer(app);
-// const io = new Server(server);
+const io = socketIo(server);
 // local imports
 const { connectDB } = require('../dataSource/dbConnections');
 const { globalErrors, routeNotFound } = require('../helpers/errorHandlers');
@@ -26,6 +26,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(process.cwd(), '/public')));
 
 connectDB();
+io.on('connection', (socket) => {
+    console.log('A user connected');
+    socket.on('disconnect', () => {
+        console.log('User disconnected');
+    });
+    socket.on('getuserLocation', ({ userId, lat, long }) => {
+        console.log('Message received: ', { userId, lat, long });
+        socket.emit('sendcheck', { success: true, message: 'user location fetched successfully.', userId: userId || 'ajshlasd' });
+    });
+});
 
 // routes
 require('../routes')(app);
