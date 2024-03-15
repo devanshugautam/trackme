@@ -28,12 +28,17 @@ app.use(express.static(path.join(process.cwd(), '/public')));
 connectDB();
 io.on('connection', (socket) => {
     console.log('A user connected');
-    socket.on('disconnect', () => {
-        console.log('User disconnected');
+    socket.on('join', (room) => {
+        socket.join(room);
+        console.log(`User joined room: ${room}`);
+        socket.emit('roomjoined', { message: 'room created', roomId: room });
     });
     socket.on('getuserLocation', (data) => {
         console.log('Message received: ', data);
-        socket.emit('sendcheck', { success: true, message: 'user location fetched successfully.', userId: data.userId || 'ajshlasd' });
+        socket.to(data.roomId).emit('sendcheck', { success: true, message: 'user location fetched successfully.', userId: data.userId || 'ajshlasd' });
+    });
+    socket.on('disconnect', () => {
+        console.log('User disconnected');
     });
 });
 
