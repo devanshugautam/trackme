@@ -30,7 +30,7 @@ io.on('connection', (socket) => {
     console.log('A user connected');
     socket.on('join', (room) => {
         socket.join(room.userId);
-        console.log(`User joined room: ${room.userId}`);
+        console.log(`User joined room: ${room}`);
         socket.emit('roomjoined', { message: 'room created', roomId: room.userId });
     });
     socket.on('getuserLocation', (data) => {
