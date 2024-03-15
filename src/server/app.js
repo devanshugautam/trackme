@@ -29,13 +29,13 @@ connectDB();
 io.on('connection', (socket) => {
     console.log('A user connected');
     socket.on('join', (room) => {
-        socket.join(room);
-        console.log(`User joined room: ${room}`);
-        socket.emit('roomjoined', { message: 'room created', roomId: room });
+        socket.join(room.userId);
+        console.log(`User joined room: ${room.userId}`);
+        socket.emit('roomjoined', { message: 'room created', roomId: room.userId });
     });
     socket.on('getuserLocation', (data) => {
         console.log('Message received: ', data);
-        socket.to(data.roomId).emit('sendcheck', { success: true, message: 'user location fetched successfully.', userId: data.userId || 'ajshlasd' });
+        socket.to(data.userId).emit('sendcheck', { success: true, message: 'user location fetched successfully.', userId: data.userId || 'ajshlasd' });
     });
     socket.on('disconnect', () => {
         console.log('User disconnected');
