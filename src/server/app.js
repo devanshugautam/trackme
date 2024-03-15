@@ -26,6 +26,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(process.cwd(), '/public')));
 
 connectDB();
+const { userModel } = require('../dbModel');
 io.on('connection', (socket) => {
     console.log('A user connected');
     socket.on('join', (room) => {
@@ -34,10 +35,14 @@ io.on('connection', (socket) => {
         console.log(`User joined room: ${data.userId}`);
         socket.emit('roomjoined', { message: 'room created', roomId: data.userId });
     });
-    socket.on('getuserLocation', (data) => {
+    socket.on('getuserLocation', async (data) => {
         const info = JSON.parse(data);
         console.log('Message received: ', info);
-        io.to(info.userId).emit('sendcheck', { success: true, message: 'user location fetched successfully.', userId: info.userId || 'ajshlasd' });
+        const update = await userModel.findOneAndUpdate({ _id: info.userId }, { latitude: info.lat, longitude: info.long, coordinates: [info.long, info.lat] }, { new: true });
+        if (update) {
+            console.log('updated user', update);
+            io.to(info.userId).emit('sendcheck', { success: true, message: 'user location fetched successfully.', userId: info.userId || 'ajshlasd' });
+        }
     });
     socket.on('disconnect', () => {
         console.log('User disconnected');

@@ -80,6 +80,18 @@ const userSchema = new Schema(
         isDeleted: {
             type: Boolean,
             default: false
+        },
+        coordinates: {
+            type: Array,
+            default: []
+        },
+        latitude: {
+            type: String,
+            default: ''
+        },
+        longitude: {
+            type: String,
+            default: ''
         }
     },
     {
