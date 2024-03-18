@@ -1,6 +1,7 @@
 //  Local import
-const { userModel } = require('../dbModel');
+const { userModel, userOverSpeedModel } = require('../dbModel');
 const { getSpeedLimit } = require('./speedLimit');
+const { query } = require('../utils/mongodbQuery');
 /**
  * configuration of sockets
  * Set up socket.io connection
@@ -36,11 +37,22 @@ module.exports = (io) => {
 
             // Emit over-speed alert if speed exceeds the limit
             if (findSpeedLimit.success && info.speed > findSpeedLimit.data.speedLimit) {
+                await query.create(userOverSpeedModel, {
+                    speed: info.speed,
+                    longitude: info.long,
+                    coordinates: [info.long, info.lat],
+                    userId: info.userId,
+                    vehicleType: findSpeedLimit.data.vehicleType,
+                    laneType: findSpeedLimit.data.laneType,
+                    speedLimit: findSpeedLimit.data.speedLimit,
+                    speedLimitId: findSpeedLimit.data._id
+                });
                 io.to(info.userId).emit('overSpeed', {
                     success: true,
                     message: `Over-speed alert: Vehicle exceeded the speed limit of ${findSpeedLimit.data.speedLimit} km/h. Current speed: ${info.speed} km/h.`,
                     userId: info.userId
                 });
+
             }
 
             // Emit success message for location update
