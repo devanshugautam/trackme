@@ -40,6 +40,7 @@ module.exports = (io) => {
                 await query.create(userOverSpeedModel, {
                     speed: info.speed,
                     longitude: info.long,
+                    latitude: info.lat,
                     coordinates: [info.long, info.lat],
                     userId: info.userId,
                     vehicleType: findSpeedLimit.data.vehicleType,
