@@ -239,7 +239,7 @@ exports.getOverSpeedOFUsers = async (auth, userId, queryParam) => {
                 message: 'You are not authorized for this action.'
             };
         }
-        const { page = 1, perPage = 7, sortBy, sortOrder } = queryParam;
+        const { page = 1, perPage = 10, sortBy, sortOrder } = queryParam;
         const userOverSpeedList = await query.aggregation(userOverSpeedModel, userDao.getOverSpeedOFUsersPipeline({ page: +page, perPage: +perPage, sortBy, sortOrder, userId }));
         const totalPages = Math.ceil(userOverSpeedList[0].count / perPage);
         return {
