@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 
 // Local Import
-const { userModel } = require('../dbModel');
+const { userModel, userOverSpeedModel } = require('../dbModel');
 const { userDao } = require('../dao');
 const { generateAuthToken } = require('../utils/tokenGenerator');
 const { query } = require('../utils/mongodbQuery');
@@ -13,23 +13,29 @@ const LOG_ID = 'services/userService';
  * Authenticates a user by verifying their credentials.
  *
  * @param {object} reqBody - The request body containing `email` and `password`.
+ * @param {string} adminAccess - The request headers containing `x-admin-access`.
  * @returns {object} - An object with authentication results:
  *   - `success` (boolean): Indicates whether the authentication was successful.
  *   - `message` (string): A message describing the result of the authentication.
  *   - `data` (Object): User data if authentication is successful.
  *   - `token` (string): JWT token if authentication is successful.
  */
-exports.login = async (reqBody) => {
+exports.login = async (reqBody, adminAccess) => {
     try {
         const { value, password, type } = reqBody;
-        const findUser = await query.findOne(userModel, { [type]: value, isDeleted: false }, { _id: 1, password: 1 });
+        const findUser = await query.findOne(userModel, { [type]: value, isDeleted: false }, { _id: 1, password: 1, role: 1 });
         if (!findUser) {
             return {
                 success: false,
                 message: 'User not found'
             };
         }
-
+        if (findUser.role != 'admin' && adminAccess) {
+            return {
+                success: true,
+                message: 'You are not authorized'
+            };
+        }
         const isPasswordValid = await bcrypt.compare(password, findUser.password);
         if (!isPasswordValid) {
             return {
@@ -45,7 +51,8 @@ exports.login = async (reqBody) => {
             fname: userData.fname,
             lname: userData.lname,
             email: userData.email,
-            username: userData.username
+            username: userData.username,
+            role: userData.role
         });
         if (!userData.image) userData.image = process.env.DUMMY_IMAGE;
         await userModel.updateOne({ _id: findUser._id }, { token });
@@ -86,6 +93,7 @@ exports.registerUser = async (body) => {
         const salt = bcrypt.genSaltSync(10);
         body.password = await bcrypt.hashSync(body.password, salt);
         body.username = `TrackMe-${body.email.split('@')[0]}-${Date.now().toString().slice(-4)}`;
+        // body.role ='user';
         const insertUser = await query.create(userModel, body);
         if (insertUser) {
             delete insertUser._doc.password;
@@ -208,6 +216,47 @@ exports.editUser = async (userId, updatedData) => {
 
     } catch (error) {
         logger.error(LOG_ID, `Error occurred while editing user profile: ${error}`);
+        return {
+            success: false,
+            message: 'Something went wrong.'
+        };
+    }
+};
+
+/**
+ * Get All user over speed
+ * 
+ * @param {object} auth - req auth
+ * @param {string} userId - req params
+ * @param {object} queryParam - optional query params
+ * @returns {object} - An object
+ */
+exports.getOverSpeedOFUsers = async (auth, userId, queryParam) => {
+    try {
+        if (auth.role != 'admin' && (!userId || userId != auth.userId)) {
+            return {
+                success: false,
+                message: 'You are not authorized for this action.'
+            };
+        }
+        const { page = 1, perPage = 7, sortBy, sortOrder } = queryParam;
+        const userOverSpeedList = await query.aggregation(userOverSpeedModel, userDao.getOverSpeedOFUsersPipeline({ page: +page, perPage: +perPage, sortBy, sortOrder, userId }));
+        const totalPages = Math.ceil(userOverSpeedList[0].count / perPage);
+        return {
+            success: true,
+            message: 'User over speed fetched successfully!',
+            data: {
+                userOverSpeedList: userOverSpeedList[0].data,
+                pagination: {
+                    page,
+                    perPage,
+                    totalChildrenCount: userOverSpeedList[0].count,
+                    totalPages
+                }
+            }
+        };
+    } catch (error) {
+        logger.error(LOG_ID, `Error occurred while fetching user over speeds: ${error}`);
         return {
             success: false,
             message: 'Something went wrong.'

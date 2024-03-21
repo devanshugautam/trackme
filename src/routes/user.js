@@ -6,7 +6,7 @@ const { logger } = require('../utils/logger');
 const { statusCode } = require('../../config/default.json');
 const { handleResponse, handleErrorResponse } = require('../helpers/response');
 const { userService } = require('../services');
-const { userValidators: { registerUser, login, getAllUser,editUser } } = require('../validators');
+const { userValidators: { registerUser, login, getAllUser, editUser } } = require('../validators');
 const { jwtVerify } = require('../middleware/auth');
 const router = express.Router();
 
@@ -17,7 +17,8 @@ const LOG_ID = 'routes/user';
  */
 router.post('/login', validate(login), async (req, res) => {
     try {
-        const result = await userService.login(req.body);
+        console.log(':::::::::::::::::::::::', req.headers['x-admin-access']);
+        const result = await userService.login(req.body, req.headers['x-admin-access']);
         if (result.success) {
             return handleResponse(res, statusCode.OK, result);
         }
@@ -72,6 +73,22 @@ router.post('/edit', jwtVerify, validate(editUser), async (req, res) => {
         return handleResponse(res, statusCode.BAD_REQUEST, result);
     } catch (err) {
         logger.error(LOG_ID, `Error occurred during registration: ${err.message}`);
+        handleErrorResponse(res, err.status, err.message, err);
+    }
+});
+
+/**
+ * Get all users according to organisation.
+ */
+router.get('/overspeed/getall/:userId?', jwtVerify, validate(getAllUser), async (req, res) => {
+    try {
+        const result = await userService.getOverSpeedOFUsers(req.auth, req.params?.userId, req.query);
+        if (result.success) {
+            return handleResponse(res, statusCode.OK, result);
+        }
+        return handleResponse(res, statusCode.BAD_REQUEST, result);
+    } catch (err) {
+        logger.error(LOG_ID, `Error occurred during fetching user over speeds: ${err.message}`);
         handleErrorResponse(res, err.status, err.message, err);
     }
 });

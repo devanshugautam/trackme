@@ -89,6 +89,10 @@ const userSchema = new Schema(
             type: String,
             default: ''
         },
+        role: {
+            type: String,
+            default: 'user'
+        },
         longitude: {
             type: String,
             default: ''

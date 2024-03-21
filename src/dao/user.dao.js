@@ -76,3 +76,105 @@ exports.getAllUsersPipeline = ({ isActive, page, perPage, sortBy, sortOrder }) =
     // console.log('>>>>>>>>>>>>>>>>>>>>>>', JSON.stringify(arr));
     return arr;
 };
+
+
+/**
+ * Generates an aggregation pipeline to retrieve a paginated list of users.
+ *
+ * @typedef {object} GetOverSpeedOFUsersOptions
+ * @property {number} page - The current page for pagination.
+ * @property {number} perPage - The number of users to display per page.
+ * @property {string} sortBy - Filter users based on their sorting field.
+ * @property {string} sortOrder - Filter users based on their sorting order.
+ * @property {string} userId - Filter users based on their id.
+ */
+
+/**
+ * Generates an aggregation pipeline to retrieve a paginated list of users ovevr speed.
+ *
+ * @param {GetOverSpeedOFUsersOptions} options - Options to customize the user retrieval.
+ * @returns {Array} - An aggregation pipeline to retrieve a paginated list of users.
+ */
+exports.getOverSpeedOFUsersPipeline = ({ page, perPage, sortBy, sortOrder, userId }) => {
+    let pipeline = [
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'userId',
+                foreignField: '_id',
+                pipeline: [
+                    {
+                        $project: {
+                            fname: 1,
+                            lname: 1,
+                            image: 1,
+                            email: 1,
+                            username: 1,
+                            coordinates: 1,
+                            latitude: 1,
+                            longitude: 1,
+                            role: 1
+                        }
+                    }
+                ],
+                as: 'userInfo'
+            }
+        },
+        {
+            $unwind: {
+                path: '$userInfo',
+                preserveNullAndEmptyArrays: true
+            }
+        },
+        {
+            $match: {
+                'userInfo.role': 'user'
+            }
+        },
+        {
+            $sort: {
+                updatedAt: -1
+            }
+        },
+        {
+            $facet: {
+                data: [
+                    {
+                        $skip: (page - 1) * perPage
+                    },
+                    {
+                        $limit: perPage
+                    }
+                ],
+                count: [
+                    {
+                        $count: 'totalCount'
+                    }
+                ]
+            }
+        },
+        {
+            $unwind: '$count'
+        },
+        {
+            $addFields: {
+                count: '$count.totalCount'
+            }
+        }
+    ];
+
+    if (sortBy && sortOrder) {
+        pipeline[3]['$sort'][sortBy] = sortOrder === 'desc' ? -1 : 1;
+    } else {
+        pipeline[3]['$sort']['updatedAt'] = -1;
+    }
+    if (userId) {
+        pipeline.unshift({
+            $match: {
+                userId: new mongoose.Types.ObjectId(userId)
+            }
+        });
+    }
+
+    return pipeline;
+};
