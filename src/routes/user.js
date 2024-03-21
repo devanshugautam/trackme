@@ -17,7 +17,7 @@ const LOG_ID = 'routes/user';
  */
 router.post('/login', validate(login), async (req, res) => {
     try {
-        console.log(':::::::::::::::::::::::', req.headers['x-admin-access']);
+        // console.log(':::::::::::::::::::::::', req.headers['x-admin-access']);
         const result = await userService.login(req.body, req.headers['x-admin-access']);
         if (result.success) {
             return handleResponse(res, statusCode.OK, result);
