@@ -32,7 +32,7 @@ exports.login = async (reqBody, adminAccess) => {
         }
         if (findUser.role != 'admin' && adminAccess) {
             return {
-                success: true,
+                success: false,
                 message: 'You are not authorized'
             };
         }
