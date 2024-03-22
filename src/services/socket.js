@@ -63,7 +63,11 @@ module.exports = (io) => {
         });
 
         socket.on('reportAccident', (data) => {
-            console.log('data>>>>>>>>>>>>>', data);
+            console.log('data>>(reportAccident)>>>>>>>>>>>', data);
+        });
+
+        socket.on('reportSOS', (data) => {
+            console.log('data>>(reportSOS)>>>>>>>>>>>', data);
         });
 
         // Handle user disconnection
