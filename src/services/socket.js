@@ -1,5 +1,5 @@
 //  Local import
-const { userModel, userOverSpeedModel } = require('../dbModel');
+const { userModel, userOverSpeedModel, accidentReportModel } = require('../dbModel');
 const { getSpeedLimit } = require('./speedLimit');
 const { query } = require('../utils/mongodbQuery');
 /**
@@ -62,11 +62,28 @@ module.exports = (io) => {
             }
         });
 
-        socket.on('reportAccident', (data) => {
-            console.log('data>>(reportAccident)>>>>>>>>>>>', data);
+        socket.on('reportAccident', async (data) => {
+            const info = JSON.parse(data);
+            // console.log('data>>(reportAccident)>>>>>>>>>>>', data);
+            const reportAccident = await query.create(accidentReportModel, {
+                userId: info.userId,
+                speed: info.speed,
+                vehicleType: info.type,
+                coordinates: [info.long, info.lat],
+                latitude: info.lat,
+                longitude: info.long
+            });
+            if (reportAccident) {
+                io.to(info.userId).emit('accidentReport', {
+                    success: true,
+                    message: `User accident reported successfully.`,
+                    data: reportAccident
+                });
+            }
         });
 
         socket.on('reportSOS', (data) => {
+            // {"lat":27.79847581,"long":76.64037606,"speed":0.0,"type":"car","userId":"65f291d2a5f8b8c75ec8bea1"}
             console.log('data>>(reportSOS)>>>>>>>>>>>', data);
         });
 
