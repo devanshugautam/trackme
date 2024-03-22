@@ -53,7 +53,6 @@ module.exports = (io) => {
                     message: `Over-speed alert: Vehicle exceeded the speed limit of ${findSpeedLimit.data.speedLimit} km/h. Current speed: ${info.speed} km/h.`,
                     userId: info.userId
                 });
-
             }
 
             // Emit success message for location update
@@ -61,6 +60,10 @@ module.exports = (io) => {
                 // console.log('updated user', update);
                 io.to(info.userId).emit('sendcheck', { success: true, message: 'user location fetched successfully.', userId: info.userId || 'ajshlasd' });
             }
+        });
+
+        socket.on('reportAccident', (data) => {
+            console.log('data>>>>>>>>>>>>>', data);
         });
 
         // Handle user disconnection
