@@ -22,8 +22,10 @@ const LOG_ID = 'services/userService';
  */
 exports.login = async (reqBody, adminAccess) => {
     try {
+        console.log('req Body>>>>>>>', reqBody);
         const { value, password, type } = reqBody;
         const findUser = await query.findOne(userModel, { [type]: value, isDeleted: false }, { _id: 1, password: 1, role: 1 });
+        console.log('find user>>>>>>>', findUser);
         if (!findUser) {
             return {
                 success: false,
