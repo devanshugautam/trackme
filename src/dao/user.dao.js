@@ -41,7 +41,8 @@ exports.getAllUsersPipeline = ({ isActive, page, perPage, sortBy, sortOrder }) =
     let arr = [
         {
             $match: {
-                isDeleted: false
+                isDeleted: false,
+                role: 'user'
             }
         },
         {
