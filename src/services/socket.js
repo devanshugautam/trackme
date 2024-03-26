@@ -22,6 +22,7 @@ module.exports = (io) => {
 
         // Receive user location data
         socket.on('getuserLocation', async (data) => {
+            console.log('Message received data: ', data);
             const info = JSON.parse(data);
             console.log('Message received: ', info);
 
