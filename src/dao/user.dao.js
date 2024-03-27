@@ -99,40 +99,6 @@ exports.getAllUsersPipeline = ({ isActive, page, perPage, sortBy, sortOrder }) =
 exports.getOverSpeedOFUsersPipeline = ({ page, perPage, sortBy, sortOrder, userId }) => {
     let pipeline = [
         {
-            $lookup: {
-                from: 'users',
-                localField: 'userId',
-                foreignField: '_id',
-                pipeline: [
-                    {
-                        $project: {
-                            fname: 1,
-                            lname: 1,
-                            image: 1,
-                            email: 1,
-                            username: 1,
-                            coordinates: 1,
-                            latitude: 1,
-                            longitude: 1,
-                            role: 1
-                        }
-                    }
-                ],
-                as: 'userInfo'
-            }
-        },
-        {
-            $unwind: {
-                path: '$userInfo',
-                preserveNullAndEmptyArrays: true
-            }
-        },
-        {
-            $match: {
-                'userInfo.role': 'user'
-            }
-        },
-        {
             $sort: {
                 updatedAt: -1
             }
@@ -145,6 +111,35 @@ exports.getOverSpeedOFUsersPipeline = ({ page, perPage, sortBy, sortOrder, userI
                     },
                     {
                         $limit: perPage
+                    },
+                    {
+                        $lookup: {
+                            from: 'users',
+                            localField: 'userId',
+                            foreignField: '_id',
+                            pipeline: [
+                                {
+                                    $project: {
+                                        fname: 1,
+                                        lname: 1,
+                                        image: 1,
+                                        email: 1,
+                                        username: 1,
+                                        coordinates: 1,
+                                        latitude: 1,
+                                        longitude: 1,
+                                        role: 1
+                                    }
+                                }
+                            ],
+                            as: 'userInfo'
+                        }
+                    },
+                    {
+                        $unwind: {
+                            path: '$userInfo',
+                            preserveNullAndEmptyArrays: true
+                        }
                     }
                 ],
                 count: [
@@ -165,9 +160,9 @@ exports.getOverSpeedOFUsersPipeline = ({ page, perPage, sortBy, sortOrder, userI
     ];
 
     if (sortBy && sortOrder) {
-        pipeline[3]['$sort'][sortBy] = sortOrder === 'desc' ? -1 : 1;
+        pipeline[0]['$sort'][sortBy] = sortOrder === 'desc' ? -1 : 1;
     } else {
-        pipeline[3]['$sort']['updatedAt'] = -1;
+        pipeline[0]['$sort']['updatedAt'] = -1;
     }
     if (userId) {
         pipeline.unshift({

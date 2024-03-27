@@ -243,7 +243,8 @@ exports.getOverSpeedOFUsers = async (auth, userId, queryParam) => {
         }
         const { page = 1, perPage = 10, sortBy, sortOrder } = queryParam;
         const userOverSpeedList = await query.aggregation(userOverSpeedModel, userDao.getOverSpeedOFUsersPipeline({ page: +page, perPage: +perPage, sortBy, sortOrder, userId }));
-        const totalPages = Math.ceil(userOverSpeedList[0]?.count || 0 / perPage);
+        // console.log('userOverSpeedList[0]?.count', userOverSpeedList[0].data.length);
+        const totalPages = Math.ceil((userOverSpeedList[0]?.count || 0) / perPage);
         if (userOverSpeedList.length == 0) {
             return {
                 success: true,
